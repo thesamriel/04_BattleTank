@@ -6,6 +6,7 @@
 
 void ATankAIController::BeginPlay()
 {
+	Super::BeginPlay();
 	auto PlayerTank = GetPlayerTank();
 	if (!PlayerTank)
 	{
@@ -14,6 +15,19 @@ void ATankAIController::BeginPlay()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s is the player's tank"), *PlayerTank->GetName())
+	}
+}
+
+void ATankAIController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (GetPlayerTank()) {
+		// TODO Move towards player
+
+		// Aim towards player
+		GetControlledTank()->AimAt(GetPlayerTank()->GetActorLocation());
+
+		// Fire if ready
 	}
 }
 
