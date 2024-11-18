@@ -29,7 +29,14 @@ jobs:
               echo "Skipping main branch: $branch"
               continue
             fi
+            
+          # Get last commit date
+          last_commit_date=$(gh api repos/${{ github.repository }}/commits/$branch --jq '.commit.committer.date')
 
-              echo "Non-default branch: $branch"
+          # Calculate branch age in days
+          branch_age_days=$(( ($(date -u +%s) - $(date -u -d "$last_commit_date" +%s)) / 86400 ))
+          
+          echo "Non-default branch: $branch is $branch_age_days days old! Last commit on $last_commit_date"
+          
           done < branches.txt
 
