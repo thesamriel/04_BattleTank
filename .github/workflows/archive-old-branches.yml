@@ -1,7 +1,7 @@
 name: Archive Old Branches
 
 on: 
-  workflow_dispatch:
+  push:
   schedule:
     - cron: '*/15 * * * *'
 
@@ -47,8 +47,8 @@ jobs:
             contributors="Just ME:)"
             # Create the PR body with contributors
             pr_body="**Archiving branch $branch**  
-              - **Last commit on:** $last_commit_date  
-              - **Contributors:** $contributors"
+            - **Last commit on:** $last_commit_date  
+            - **Contributors:** $contributors"
             
             # Check if there are commits between the branch and master
             commits_between=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[].sha' | wc -l)
