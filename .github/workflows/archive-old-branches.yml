@@ -49,7 +49,7 @@ jobs:
             contributors=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[] | "  - \(.commit.author.name) (@\(.author.login))  "' | sort | uniq -c | sort -nr)
 
             # Get number of commits
-            commit_count=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[]' | length)
+            commit_count=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits | length')
             echo "$commit_count"
             
             # Create the PR body with contributors
