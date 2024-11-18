@@ -40,8 +40,8 @@ jobs:
             echo "Branch $branch is $branch_age_minutes minutes old. Archiving..."
 
             # Get contributors to the branch
-            contributors=$(gh api repos/${{ github.repository }}/commits/$branch --jq '.[].author.login')
-
+            # contributors=$(gh api repos/${{ github.repository }}/commits/$branch --jq '.[].author.login')
+            contributors="Just ME:)"
             # Create the PR body with contributors
             pr_body="Archiving branch $branch.\nLast commit on: $last_commit_date\n\nContributors:\n$contributors"
 
