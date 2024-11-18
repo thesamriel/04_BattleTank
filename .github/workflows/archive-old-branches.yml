@@ -54,15 +54,14 @@ jobs:
             if [ $commits_between -gt 0 ]; then
               # Create, close, and delete the branch
               echo "Create PR..."
-              gh pr create --title "Archive PR for branch \"$branch\"" --body "$pr_body" --base master --head $branch
+              pr_number=$(gh pr create --title "Archive PR for branch \"$branch\"" --body "$pr_body" --base master --head $branch --json number -q .number)
 
               # Wait for the PR to appear and close it
               max_retries=3
               retry_interval=5  # seconds
               echo "Wait for PR to appear..."
               for ((i=1; i <= $max_retries; i++)); do
-                pr_number=$(gh pr list --search "head:$branch" --json number --jq '.[0].number')
-                if [[ -n "$pr_number" ]]; then
+                if gh api -X GET /repos/${{ github.repository }}/pulls/$pr_number --silent; then
                   echo "Found the PR. Closing now..."
                   gh pr close $pr_number
                   break
