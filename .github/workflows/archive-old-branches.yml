@@ -52,7 +52,25 @@ jobs:
               # Create, close, and delete the branch
               pr_object=$(gh pr create --title "Archive PR for branch \"$branch\"" --body "$pr_body" --base master --head $branch)
               pr_number=$($pr_object --jq '.number')
-              gh pr close $pr_number
+
+              # Wait for the PR to appear and close it
+              max_retries=3
+              retry_interval=5  # seconds
+              
+              for ((i=1; i <= $max_retries; i++)); do
+                  # Check if the PR exists using the number
+                  if gh api -X GET /repos/${{ github.repository }}/pulls/$pr_number --silent; then
+                      gh pr close $pr_number
+                      break
+                  fi
+                  echo "Waiting for PR $pr_number to be created. Retrying in $retry_interval seconds..."
+                  sleep $retry_interval
+              done
+            
+              if [[ -z "$pr_number" ]]; then
+                echo "Failed to find and close the PR after $max_retries retries."
+              fi
+  
               # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
               echo "Branch $branch archived and deleted."
             else
