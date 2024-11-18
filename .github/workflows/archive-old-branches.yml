@@ -29,7 +29,7 @@ jobs:
           while read branch; do
             # Skip main branch
             if [ "$branch" = "master" ] || [ "$branch" = "main" ]; then
-              echo "Skipping main branch: $branch"
+              echo "Skipping main branch: ${branch}..."
               continue
             fi
             
@@ -39,8 +39,9 @@ jobs:
           # Calculate branch age in days
           branch_age_minutes=$(( ($(date -u +%s) - $(date -u -d "$last_commit_date" +%s)) / 60 ))
 
+          # Check whether the branch is old enough
           if [ $branch_age_minutes -gt 5 ]; then
-            echo "Branch $branch is $branch_age_minutes minutes old. Archiving..."
+            echo "  Branch $branch is $branch_age_minutes minutes old. Archiving..."
 
             # Format the last commit date
             formatted_date=$(date -u -d "$last_commit_date" +"%B %d, %Y")
@@ -50,7 +51,6 @@ jobs:
 
             # Get number of commits
             commit_count=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits | length')
-            echo "$commit_count"
             
             # Create the PR body with contributors
             pr_body="**Archiving branch $branch**  
@@ -64,36 +64,35 @@ jobs:
           
             if [ $commits_between -gt 0 ]; then
               # Create, close, and delete the branch
-              echo "Create PR..."
-              pr_url=$(gh pr create --title "Archive PR for branch \"$branch\"" --body "$pr_body" --base master --head $branch)
+              echo "  Create PR for ${branch}..."
+              pr_url=$(gh pr create --title "Archive branch \"$branch\"" --body "$pr_body" --base master --head $branch)
 
               # Wait for the PR to appear and close it
-              max_retries=3
+              max_retries=5
               retry_interval=5  # seconds
-              echo "Wait for PR to appear..."
               for ((i=1; i <= $max_retries; i++)); do
                 if gh api -X GET $pr_url --silent; then
-                  echo "Found the PR. Closing now..."
+                  echo "  Closing the PR..."
                   gh pr close $pr_url
+                  # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
+                  echo "  Branch $branch archived and deleted."
                   break 2
                 fi
-                  echo "Waiting for PR $pr_number to be created. Retrying in $retry_interval seconds..."
+                  echo "  Waiting for PR $pr_number to be created. Retrying in $retry_interval seconds..."
                   sleep $retry_interval
               done
             
               if [[ -z "$pr_number" ]]; then
-                echo "Failed to find and close the PR after $max_retries retries."
+                echo "  Failed to find and close the PR after $max_retries retries."
               fi
   
-              # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
-              echo "Branch $branch archived and deleted."
             else
-              echo "No commits between $branch and master. Deleting branch directly."
+              echo "No commits between $branch and master. Deleting branch directly..."
               gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
             fi
 
           else
-            echo "Branch $branch is $branch_age_minutes days old. Skipping."
+            echo "Branch $branch is $branch_age_minutes days old. Skipping..."
           fi
           
           done < branches.txt
