@@ -2,22 +2,36 @@ name: Archive Old Branches
 
 on: 
   workflow_dispatch:
-  push:
   schedule:
     - cron: '*/5 * * * *'
 
 jobs:
-  Explore-GitHub-Actions:
+  ArchiveStaleBranches:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
+      - name: Authenticate GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh auth login --with-token <<< "$GITHUB_TOKEN"
+
+      - name: Filter and archive stale branches
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+          # Fetch all branches
+          gh api repos/${{ github.repository }}/branches | jq -r '.[].name' > branches.txt
+
+          # Loop through branches
+          while read branch; do
+            # Skip main branch
+            if [ "$branch" = "master" ] || [ "$branch" = "main" ]; then
+              echo "Skipping main branch: $branch"
+              continue
+            fi
+
+              echo "Non-default branch: $branch"
+          done < branches.txt
+
