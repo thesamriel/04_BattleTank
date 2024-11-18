@@ -51,7 +51,7 @@ jobs:
             if [ $commits_between -gt 0 ]; then
               # Create, close, and delete the branch
               pr_object=$(gh pr create --title "Archive PR for branch \"$branch\"" --body "$pr_body" --base master --head $branch)
-              pr_number=$(pr_object --jq '.number')
+              pr_number=$($pr_object --jq '.number')
               gh pr close $pr_number
               # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
               echo "Branch $branch archived and deleted."
