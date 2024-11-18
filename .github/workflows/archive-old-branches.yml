@@ -36,7 +36,7 @@ jobs:
           # Calculate branch age in days
           branch_age_minutes=$(( ($(date -u +%s) - $(date -u -d "$last_commit_date" +%s)) / 60 ))
 
-          if [ $branch_age_minutes -gt 100 ]; then
+          if [ $branch_age_minutes -gt 5 ]; then
             echo "Branch $branch is $branch_age_minutes minutes old. Archiving..."
 
             # Get contributors to the branch
