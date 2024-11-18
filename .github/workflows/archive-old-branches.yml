@@ -54,7 +54,7 @@ jobs:
             
             # Create the PR body with contributors
             pr_body="**Archiving branch $branch**  
-            - **Last commit on:** $last_commit_date  
+            - **Last commit on:** $formatted_date  
             - **Total number of commits:** $commit_count  
             - **Contributors:**  
             $contributors"
