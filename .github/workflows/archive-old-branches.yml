@@ -63,7 +63,7 @@ jobs:
               for ((i=1; i <= $max_retries; i++)); do
                 if gh api -X GET $pr_url --silent; then
                   echo "Found the PR. Closing now..."
-                  gh pr close $pr_number
+                  gh pr close $pr_url
                   break
                 fi
                   echo "Waiting for PR $pr_number to be created. Retrying in $retry_interval seconds..."
