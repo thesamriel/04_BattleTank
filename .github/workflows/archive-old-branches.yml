@@ -36,7 +36,7 @@ jobs:
           # Calculate branch age in days
           branch_age_minutes=$(( ($(date -u +%s) - $(date -u -d "$last_commit_date" +%s)) / 60 ))
 
-          if [ $branch_age_minutes -gt 150 ]; then
+          if [ $branch_age_minutes -gt 100 ]; then
             echo "Branch $branch is $branch_age_minutes minutes old. Archiving..."
 
             # Get contributors to the branch
@@ -50,8 +50,9 @@ jobs:
           
             if [ $commits_between -gt 0 ]; then
               # Create, close, and delete the branch
-              gh pr create --title "Archive PR for branch \"$branch\"" --body "$pr_body" --base master --head $branch
-              # gh pr close "$(gh pr list --search "head:$branch" --json number --jq '.[0].number')"
+              pr_object=$(gh pr create --title "Archive PR for branch \"$branch\"" --body "$pr_body" --base master --head $branch)
+              pr_number=$(pr_object --jq '.number')
+              gh pr close $pr_number
               # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
               echo "Branch $branch archived and deleted."
             else
