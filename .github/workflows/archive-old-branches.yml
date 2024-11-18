@@ -63,6 +63,7 @@ jobs:
               for ((i=1; i <= $max_retries; i++)); do
                   # Check if the PR exists using the number
                   if gh api -X GET /repos/${{ github.repository }}/pulls/$pr_number --silent; then
+                      echo "Found the PR. Closing now..."
                       gh pr close $pr_number
                       break
                   fi
