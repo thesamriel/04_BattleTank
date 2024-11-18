@@ -9,14 +9,12 @@ jobs:
   ArchiveStaleBranches:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+    
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
-
-      - name: Authenticate GitHub CLI
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh auth login --with-token <<< "$GITHUB_TOKEN"
-
+        
       - name: Filter and archive stale branches
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
