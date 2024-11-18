@@ -49,8 +49,8 @@ jobs:
             contributors=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[] | "  - \(.commit.author.name) (@\(.author.login))  "' | sort | uniq)
 
             # Get number of commits
-            commit_count=$(gh api repos/${{ github.repository }}/commits/$branch --jq '.length')
-
+            commit_count=$(gh api repos/${{ github.repository }}/commits/$branch)
+            echo "$commit_count"
             # Create the PR body with contributors
             pr_body="**Archiving branch $branch**  
             - **Last commit on:** $last_commit_date  
@@ -74,7 +74,7 @@ jobs:
                 if gh api -X GET $pr_url --silent; then
                   echo "Found the PR. Closing now..."
                   gh pr close $pr_url
-                  break
+                  break 2
                 fi
                   echo "Waiting for PR $pr_number to be created. Retrying in $retry_interval seconds..."
                   sleep $retry_interval
