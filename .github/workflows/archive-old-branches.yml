@@ -46,7 +46,7 @@ jobs:
             formatted_date=$(date -u -d "$last_commit_date" +"%B %d, %Y")
 
             # Get contributors to the branch
-            contributors=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[] | "  - \(.commit.author.name) (@\(.author.login))  "' | sort | uniq -c | sort -nr)
+            contributors=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[] | "  - \(.commit.author.name) (@\(.author.login))  "' | sort | uniq)
 
             # Get number of commits
             commit_count=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits | length')
