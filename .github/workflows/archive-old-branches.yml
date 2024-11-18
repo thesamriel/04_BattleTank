@@ -45,11 +45,20 @@ jobs:
             # Create the PR body with contributors
             pr_body="Archiving branch $branch.\nLast commit on: $last_commit_date\n\nContributors:\n$contributors"
 
-            # Create, close, and delete the branch
-            gh pr create --title "Archive PR for branch \"$branch\"" --body "$pr_body" --base master --head $branch
-            # gh pr close "$(gh pr list --search "head:$branch" --json number --jq '.[0].number')"
-            # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
-            echo "Branch $branch archived and deleted."
+            # Check if there are commits between the branch and master
+            commits_between=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[].sha' | wc -l)
+          
+            if [ $commits_between -gt 0 ]; then
+              # Create, close, and delete the branch
+              gh pr create --title "Archive PR for branch \"$branch\"" --body "$pr_body" --base master --head $branch
+              # gh pr close "$(gh pr list --search "head:$branch" --json number --jq '.[0].number')"
+              # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
+              echo "Branch $branch archived and deleted."
+            else
+              echo "No commits between $branch and master. Deleting branch directly."
+              gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
+            fi
+
           else
             echo "Branch $branch is $branch_age_minutes days old. Skipping."
           fi
