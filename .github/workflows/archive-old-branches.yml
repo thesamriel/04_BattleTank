@@ -72,18 +72,19 @@ jobs:
             if [ $commits_between -gt 0 ]; then
 
               diff=$(git diff -- master...$branch)
+              echo "$diff"
               summary=$(python .github/workflows/create_pr_summary.py <<< "$diff")
 
               # Create the PR body with contributors
-              pr_body="## **Archiving branch \`$branch\`**  
-              - **Last commit on:** $last_commit_date_f  
-              - **First commit on:** $first_commit_date_f  
-              - **Total number of commits:** $commit_count  
-              - **Contributors:**  
-              $contributors  
-              ## Changes Summary  
-              (Generated using Gemini AI)  
-              $summary"
+              pr_body="## **Archiving branch \`$branch\`**
+            - **Last commit on:** $last_commit_date_f  
+            - **First commit on:** $first_commit_date_f  
+            - **Total number of commits:** $commit_count  
+            - **Contributors:**  
+            $contributors  
+            ## Changes Summary  
+            (Generated using Gemini AI)  
+            $summary"
               
               # Create, close, and delete the branch
               echo "  Create PR for ${branch}..."
