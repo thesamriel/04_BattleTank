@@ -71,7 +71,7 @@ jobs:
           
             if [ $commits_between -gt 0 ]; then
 
-              diff=$(git diff -- master...$branch)
+              diff=$(git diff origin/master...origin/$branch)
               echo "$diff"
               summary=$(python .github/workflows/create_pr_summary.py <<< "$diff")
 
