@@ -75,15 +75,15 @@ jobs:
               summary=$(python .github/workflows/create_pr_summary.py <<< "$diff")
 
               # Create the PR body with contributors
-              pr_body="**Archiving branch \`$branch\`**  
-              - **Last commit on:** $last_commit_date_f  
-              - **First commit on:** $first_commit_date_f  
-              - **Total number of commits:** $commit_count  
-              - **Contributors:**  
-              $contributors  
-              ### Changes Summary  
-              (Generated using Gemini AI)  
-              summary"
+              pr_body="## **Archiving branch \`$branch\`**  
+      - **Last commit on:** $last_commit_date_f  
+      - **First commit on:** $first_commit_date_f  
+      - **Total number of commits:** $commit_count  
+      - **Contributors:**  
+      $contributors  
+      ### Changes Summary  
+      Generated using Gemini AI)  
+      $summary"
               
               # Create, close, and delete the branch
               echo "  Create PR for ${branch}..."
@@ -94,11 +94,6 @@ jobs:
               retry_interval=5  # seconds
               for ((i=1; i <= $max_retries; i++)); do
                 if gh api -X GET $pr_url --silent; then
-                  
-                  # Create AI summary
-                  diff=$(gh pr diff $pr_url)
-                  summary=$(python create_pr_summary.py <<< "$diff")
-
                   echo "  Closing the PR..."
                   gh pr close $pr_url
                   # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
