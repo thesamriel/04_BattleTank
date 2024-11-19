@@ -71,7 +71,7 @@ jobs:
           
             if [ $commits_between -gt 0 ]; then
 
-              diff=$(git diff master...$branch)
+              diff=$(git diff -- master...$branch)
               summary=$(python create_pr_summary.py <<< "$diff")
 
               # Create the PR body with contributors
