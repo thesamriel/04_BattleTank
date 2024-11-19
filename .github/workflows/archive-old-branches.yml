@@ -47,7 +47,7 @@ jobs:
             last_commit_date_f=$(date -u -d "$last_commit_date" +"%B %d, %Y")
 
             # Get the first commit date
-            first_commit_date=$(gh api repos/${{ github.repository }}/branches/$branch --jq '.commit.committer.date')
+            first_commit_date=$last_commit_date # (gh api repos/${{ github.repository }}/branches/$branch --jq '.commit.committer.date')
             first_commit_date_f=$(date -u -d "$first_commit_date" +"%B %d, %Y")
 
             # Get contributors to the branch
@@ -62,7 +62,8 @@ jobs:
             - **First commit on:** $first_commit_date_f  
             - **Total number of commits:** $commit_count  
             - **Contributors:**  
-            $contributors"
+            $contributors  
+            @coderabbitai summary"
             
             # Check if there are commits between the branch and master
             commits_between=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[].sha' | wc -l)
