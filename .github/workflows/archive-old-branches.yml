@@ -15,10 +15,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Install Python dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python Dependencies
         run: | 
-          python -m ensurepip --upgrade
-          pip install google-generativeai
+          python -m pip install --upgrade pip google-generativeai
+
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
         
