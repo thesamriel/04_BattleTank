@@ -14,13 +14,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-    
+      
+      - name: Install Python dependencies
+        run: | 
+          python -m ensurepip --upgrade
+          pip install google-generativeai
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
         
       - name: Filter and archive stale branches
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           # Fetch all branches
           gh api repos/${{ github.repository }}/branches | jq -r '.[].name' > branches.txt
@@ -56,19 +61,25 @@ jobs:
             # Get number of commits
             commit_count=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits | length')
             
-            # Create the PR body with contributors
-            pr_body="**Archiving branch \`$branch\`**  
-            - **Last commit on:** $last_commit_date_f  
-            - **First commit on:** $first_commit_date_f  
-            - **Total number of commits:** $commit_count  
-            - **Contributors:**  
-            $contributors  
-            @coderabbitai summary"
-            
             # Check if there are commits between the branch and master
             commits_between=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[].sha' | wc -l)
           
             if [ $commits_between -gt 0 ]; then
+
+              diff=$(git diff master...$branch)
+              summary=$(python create_pr_summary.py <<< "$diff")
+
+              # Create the PR body with contributors
+              pr_body="**Archiving branch \`$branch\`**  
+              - **Last commit on:** $last_commit_date_f  
+              - **First commit on:** $first_commit_date_f  
+              - **Total number of commits:** $commit_count  
+              - **Contributors:**  
+              $contributors  
+              ### Changes Summary  
+              (Generated using Gemini AI)  
+              summary"
+              
               # Create, close, and delete the branch
               echo "  Create PR for ${branch}..."
               pr_url=$(gh pr create --title "Archive branch \"$branch\"" --body "$pr_body" --base master --head $branch)
@@ -78,6 +89,11 @@ jobs:
               retry_interval=5  # seconds
               for ((i=1; i <= $max_retries; i++)); do
                 if gh api -X GET $pr_url --silent; then
+                  
+                  # Create AI summary
+                  diff=$(gh pr diff $pr_url)
+                  summary=$(python create_pr_summary.py <<< "$diff")
+
                   echo "  Closing the PR..."
                   gh pr close $pr_url
                   # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
