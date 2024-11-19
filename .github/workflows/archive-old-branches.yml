@@ -76,14 +76,14 @@ jobs:
 
               # Create the PR body with contributors
               pr_body="## **Archiving branch \`$branch\`**  
-      - **Last commit on:** $last_commit_date_f  
-      - **First commit on:** $first_commit_date_f  
-      - **Total number of commits:** $commit_count  
-      - **Contributors:**  
-      $contributors  
-      ## Changes Summary  
-      (Generated using Gemini AI)  
-      $summary"
+              - **Last commit on:** $last_commit_date_f  
+              - **First commit on:** $first_commit_date_f  
+              - **Total number of commits:** $commit_count  
+              - **Contributors:**  
+              $contributors  
+              ## Changes Summary  
+              (Generated using Gemini AI)  
+              $summary"
               
               # Create, close, and delete the branch
               echo "  Create PR for ${branch}..."
