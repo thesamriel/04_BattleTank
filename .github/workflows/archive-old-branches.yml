@@ -55,26 +55,21 @@ jobs:
           if [ $branch_age_minutes -gt 5 ]; then
             echo "  Branch $branch is $branch_age_minutes minutes old. Archiving..."
 
-            # Format the last commit date
-            last_commit_date_f=$(date -u -d "$last_commit_date" +"%B %d, %Y")
-
-            # Get the first commit date
-            first_commit_date=$(gh api repos/${{ github.repository }}/branches/$branch --jq '.commit.committer.date')
-            first_commit_date_f=$(date -u -d "$first_commit_date" +"%B %d, %Y")
-
-            # Get contributors to the branch
-            contributors=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[] | "  - \(.commit.author.name) (@\(.author.login))  "' | sort | uniq)
-
             # Get number of commits
             commit_count=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits | length')
             
-            # Check if there are commits between the branch and master
-            commits_between=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[].sha' | wc -l)
-          
-            if [ $commits_between -gt 0 ]; then
+            if [ $commit_count -gt 0 ]; then
+              # Format the last commit date
+              last_commit_date_f=$(date -u -d "$last_commit_date" +"%B %d, %Y")
+
+              # Get the first commit date
+              first_commit_date=$(gh api repos/${{ github.repository }}/branches/$branch --jq '.commit.committer.date')
+              first_commit_date_f=$(date -u -d "$first_commit_date" +"%B %d, %Y")
+
+              # Get contributors to the branch
+              contributors=$(gh api repos/${{ github.repository }}/compare/master...$branch --jq '.commits[] | "  - \(.commit.author.name) (@\(.author.login))  "' | sort | uniq)
 
               diff=$(git diff origin/master...origin/$branch)
-              echo "$diff"
               summary=$(python .github/workflows/create_pr_summary.py <<< "$diff")
 
               # Create the PR body with contributors
@@ -85,7 +80,7 @@ jobs:
             - **Contributors:**  
             $contributors  
             ## Changes Summary  
-            (Generated using Gemini AI)  
+            *(Generated using Gemini AI)*  
             $summary"
               
               # Create, close, and delete the branch
@@ -95,6 +90,7 @@ jobs:
               # Wait for the PR to appear and close it
               max_retries=5
               retry_interval=5  # seconds
+
               for ((i=1; i <= $max_retries; i++)); do
                 if gh api -X GET $pr_url --silent; then
                   echo "  Closing the PR..."
