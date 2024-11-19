@@ -81,8 +81,8 @@ jobs:
       - **Total number of commits:** $commit_count  
       - **Contributors:**  
       $contributors  
-      ### Changes Summary  
-      Generated using Gemini AI)  
+      ## Changes Summary  
+      (Generated using Gemini AI)  
       $summary"
               
               # Create, close, and delete the branch
