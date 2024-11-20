@@ -35,7 +35,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           # Fetch all branches
-          gh api repos/${{ github.repository }}/branches -- jq -r '.[].name' > branches.txt
+          gh api repos/${{ github.repository }}/branches | jq -r '.[].name' > branches.txt
 
           # Loop through branches
           while read branch; do
@@ -92,10 +92,10 @@ jobs:
               retry_interval=5  # seconds
 
               for ((i=1; i <= $max_retries; i++)); do
-                if gh api -X GET $pr_url --silent; then
+                if [ gh pr view $pr_url --json state --jq '.state' = 'OPEN' ]; then
                   echo "  Closing the PR..."
                   gh pr close $pr_url
-                  git push origin --delete $branch
+                  # git push origin --delete $branch
                   # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
                   echo "  Branch $branch archived and deleted."
                   break 2
