@@ -95,7 +95,8 @@ jobs:
                 if gh api -X GET $pr_url --silent; then
                   echo "  Closing the PR..."
                   gh pr close $pr_url
-                  gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
+                  git branch -d $branch
+                  # gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch
                   echo "  Branch $branch archived and deleted."
                   break 2
                 fi
